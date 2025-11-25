@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+
+// Defines the MealEntry model, which maps to the 'MealEntry' table in the database.
+model MealEntry {
+  id               String   @id @default(cuid()) // Unique identifier for each entry
+  date             String   // The date of the meal in YYYY-MM-DD format
+  employeeId       String
+  employeeName     String
+  vertical         String
+  reportingManager String
+  location         String
+  shiftTimings     String
+  mealType         MealType // Enum for meal type (Veg or Non_Veg)
+  createdAt        DateTime @default(now()) // Timestamp for when the record was created
+  updatedAt        DateTime @updatedAt      // Timestamp for when the record was last updated
+
+  // Defines a unique constraint. 
+  // An employee can only have one meal entry per day.
+  @@unique([date, employeeId], name: "date_employeeId_unique")
+}
+
+// Defines the MealType enum used in the MealEntry model.
+// Note: Enum values in Prisma cannot contain hyphens. The API layer handles mapping 'Non-Veg' to 'Non_Veg'.
+enum MealType {
+  Veg
+  Non_Veg
+}
+
+model Payment {
+  id                      Int @id @default(autoincrement())
+  razorpay_payment_id     String
+  razorpay_order_id       String
+  razorpay_signature      String
+  amount                  Int
+  currency                String
+  createdAt               DateTime @default(now())
+}
