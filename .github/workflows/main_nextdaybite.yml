@@ -52,4 +52,4 @@ jobs:
           app-name: 'NextDayBite'
           slot-name: 'Production'
           package: .
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_697EBC4CB7384EA49DCCB1D34020012B }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_7666D347B1E04B4AA6186B92C03A96BC }}
