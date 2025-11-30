@@ -6,6 +6,7 @@ export default function Document() {
       <Head>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" async></script>
         <script src="https://checkout.razorpay.com/v1/checkout.js" async></script>
+        <script src="https://unpkg.com/html5-qrcode" type="text/javascript" async></script>
       </Head>
       <body>
         <Main />
