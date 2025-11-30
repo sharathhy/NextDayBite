@@ -1,0 +1,90 @@
+
+# Meal Planner AI Agent (Next.js Version) - Setup Instructions
+
+This guide will walk you through setting up and running the new full-stack version of your Meal Planner application, which has been migrated from a Vite/React frontend to a Next.js application with a Prisma ORM and MySQL database backend.
+
+## Summary of Changes
+
+- **Framework:** The project now uses Next.js, which provides server-side rendering, API routes, and a more structured full-stack environment.
+- **Database:** Instead of using the browser's `localStorage`, all meal entries are now saved to a MySQL database. This means data is persistent and can be shared.
+- **Data Management:** Prisma is used as the Object-Relational Mapper (ORM) to interact with the database in a type-safe way.
+- **API Layer:** Next.js API routes (`/api/meals`) handle all the logic for creating, reading, and deleting meal entries from the database.
+- **Data Fetching:** The frontend now uses the `SWR` library to fetch data from the API, providing a real-time feel and automatic UI updates.
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
+
+1.  **Node.js:** Version 18 or later.
+2.  **MySQL Database:** A running MySQL server instance. You will need to create a database for this application (e.g., named `user_meals`).
+
+---
+
+## Step-by-Step Setup Guide
+
+Follow these steps carefully to get the application running on your local machine.
+
+### Step 1: Install Dependencies
+
+First, open your terminal in the project's root directory and install all the required packages defined in `package.json`.
+
+```bash
+npm install
+```
+
+### Step 2: Set Up Environment Variables
+
+The application needs to connect to your MySQL database. To do this, you must provide a connection string.
+
+1.  Create a new file named `.env` in the root of your project directory.
+2.  Add the following line to the `.env` file, replacing the placeholder values with your actual database credentials:
+
+    ```env
+    DATABASE_URL="mysql://USER:PASSWORD@HOST:PORT/DATABASE"
+    ```
+
+    **Example:**
+    If your MySQL username and password are both `root`, your server is running on `localhost` at port `3306`, and your database is named `user_meals`, the line would be:
+    `DATABASE_URL="mysql://root:root@localhost:3306/user_meals"`
+
+### Step 3: Run the Database Migration
+
+This is a crucial step. The Prisma migration command will read your `prisma/schema.prisma` file, connect to your database, and automatically create the `MealEntry` table with all the correct columns and constraints.
+
+Run the following command in your terminal:
+
+```bash
+npx prisma migrate dev --name init
+```
+
+You will be prompted to confirm. Prisma will then apply the schema to your database.
+
+### Step 4: Run the Development Server
+
+Now that everything is set up, you can start the Next.js development server.
+
+```bash
+npm run dev
+```
+
+The application will now be running. Open your web browser and navigate to:
+
+**http://localhost:3000**
+
+You should see the Meal Planner application running, now fully backed by your MySQL database!
+
+---
+
+## Additional Useful Prisma Commands
+
+-   **Generate Prisma Client:** If you ever make changes to `schema.prisma`, you'll need to regenerate the Prisma Client.
+    ```bash
+    npx prisma generate
+    ```
+
+-   **Open Prisma Studio:** Prisma provides a beautiful GUI to view and manage the data in your database directly.
+    ```bash
+    npx prisma studio
+    ```
+    This will open a new tab in your browser where you can interact with your data.
+    

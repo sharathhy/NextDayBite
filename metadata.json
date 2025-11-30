@@ -1,0 +1,7 @@
+{
+  "name": "Meal Planner AI Agent",
+  "description": "An AI-powered agent to manage daily meal requests for employees. It provides a form for meal selection, enforces a daily cutoff time, and displays a summary of orders, simulating an Excel-like data management experience.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

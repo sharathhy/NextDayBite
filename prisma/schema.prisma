@@ -1,0 +1,79 @@
+// This is your Prisma schema file.
+// Learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Specifies the Prisma Client generator.
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Defines the database connection. 
+// It uses MySQL and gets the connection URL from the .env file.
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Defines the MealEntry model, which maps to the 'MealEntry' table in the database.
+model MealEntry {
+  id               String   @id @default(cuid()) // Unique identifier for each entry
+  date             String   // The date of the meal in YYYY-MM-DD format
+  employeeId       String
+  employeeName     String
+  vertical         String
+  reportingManager String
+  location         String
+  shiftTimings     String
+  mealType         MealType // Enum for meal type (Veg or Non_Veg)
+  paymentMethod    String   @default("Standard") // "Standard", "Points", or "Online"
+  isRedeemed       Boolean  @default(false)      // Tracks if the meal has been consumed
+  redeemedAt       DateTime?                     // Timestamp of redemption
+  createdAt        DateTime @default(now()) // Timestamp for when the record was created
+  updatedAt        DateTime @updatedAt      // Timestamp for when the record was last updated
+
+  // Defines a unique constraint. 
+  // An employee can only have one meal entry per day.
+  @@unique([date, employeeId], name: "date_employeeId_unique")
+}
+
+model UserPoint {
+  employeeId String @id
+  points     Int    @default(0)
+  updatedAt  DateTime @updatedAt
+  mealType   MealType
+}
+
+model Payment {
+  id                  Int      @id @default(autoincrement())
+  date                String   // The date of the transaction
+  employeeId          String
+  razorpay_payment_id String
+  razorpay_order_id   String
+  razorpay_signature  String
+  amount              Int      // Amount in paise
+  currency            String
+  createdAt           DateTime @default(now())
+}
+
+// Defines the MealType enum used in the MealEntry model.
+// Note: Enum values in Prisma cannot contain hyphens. The API layer handles mapping 'Non-Veg' to 'Non_Veg'.
+enum MealType {
+  Veg
+  Non_Veg
+}
+
+model PointHistory {
+  id         Int      @id @default(autoincrement())
+  employeeId String
+  change     Int      // Positive for addition, negative for deduction
+  reason     String   // Description of the transaction
+  createdAt  DateTime @default(now())
+}
+
+
+model Feedback {
+  id        Int      @id @default(autoincrement())
+  category  String
+  rating    Int?
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+}
