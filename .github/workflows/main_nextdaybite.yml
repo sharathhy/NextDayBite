@@ -29,11 +29,22 @@ jobs:
           npm run build --if-present
           npm run test --if-present
       
+      - name: Create deployment package
+        shell: pwsh
+        run: |
+          # include only production files required by your app
+          $items = @('.next','package.json','package-lock.json','public','next.config.js')
+          # filter items that exist
+          $existing = $items | Where-Object { Test-Path $_ }
+          if (-not $existing) { Write-Host "No production files found to package"; exit 1 }
+          Compress-Archive -Path $existing -DestinationPath node-app.zip -Force
+          Write-Host "Created node-app.zip with: $existing"
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: .
+          path: node-app.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -51,5 +62,5 @@ jobs:
         with:
           app-name: 'NextDayBite'
           slot-name: 'Production'
-          package: .
+          package: ./node-app.zip
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2703031C28F44AD5B4C49BEA32097485 }}
