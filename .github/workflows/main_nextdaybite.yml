@@ -38,7 +38,9 @@ jobs:
           cp -r node_modules deploy/node_modules
 
       - name: Zip deploy
-        run: zip -r node-app.zip deploy/*
+        run: |
+          cd deploy
+          zip -r ../node-app.zip .
 
       - name: List ZIP contents
         run: unzip -l node-app.zip
