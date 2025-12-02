@@ -20,19 +20,21 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build Next.js (Standalone)
+      - name: Build Next.js
         run: npm run build
+
+
 
       - name: Create deploy folder
         run: |
-          mkdir -p deploy
-          cp -r .next/standalone/* deploy/
-          cp -r .next/static deploy/.next/static
+          mkdir deploy
+          cp -r .next deploy/.next
           cp -r public deploy/public
           cp server.js deploy/
           cp web.config deploy/
           cp package.json deploy/
           cp package-lock.json deploy/
+          cp -r node_modules deploy/node_modules
 
       - name: Zip deploy
         run: |
