@@ -25,9 +25,9 @@ jobs:
 
       - name: Create deploy folder
         run: |
-          mkdir deploy
+          mkdir -p deploy/.next/static
           cp -r .next/standalone/* deploy/
-          cp -r .next/static deploy/.next/static
+          cp -r .next/static/* deploy/.next/static
           cp -r public deploy/public
           cp server.js deploy/
           cp web.config deploy/
