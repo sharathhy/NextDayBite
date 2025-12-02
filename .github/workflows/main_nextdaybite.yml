@@ -26,21 +26,13 @@ jobs:
       - name: Create deploy folder
         run: |
           mkdir -p deploy
-          mkdir -p deploy/.next
-          mkdir -p deploy/.next/static
           cp -r .next/standalone/* deploy/
-          cp -r .next/static/* deploy/.next/static
+          cp -r .next/static deploy/.next/static
           cp -r public deploy/public
           cp server.js deploy/
           cp web.config deploy/
           cp package.json deploy/
           cp package-lock.json deploy/
-
-      - name: Install production dependencies only
-        run: |
-          npm ci --only=production
-          npm prune --production
-          cp -r node_modules deploy/node_modules
 
       - name: Zip deploy
         run: |
