@@ -17,7 +17,7 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install deps
+      - name: Install dependencies
         run: npm install
 
       - name: Build Next.js standalone
@@ -26,18 +26,19 @@ jobs:
       - name: Create deploy folder
         run: |
           mkdir deploy
-          # copy standalone app (contains node_modules)
+          
+          # Copy standalone build (contains node_modules)
           cp -r .next/standalone/* deploy/
           
-          # ensure .next folder exists inside deploy before placing static
+          # Ensure .next folder exists inside deploy for static files
           mkdir -p deploy/.next/static
           
-          # copy static files if present
+          # Copy static files if present
           if [ -d ".next/static" ]; then
             cp -r .next/static/* deploy/.next/static/
           fi
           
-          # additional files
+          # Copy additional required files
           cp -r public deploy/public
           cp package.json deploy/
           cp server.js deploy/
@@ -45,8 +46,10 @@ jobs:
 
       - name: Zip deploy
         run: |
-          cd deploy
-          zip -r ../node-app.zip .
+          zip -r node-app.zip deploy/*
+
+      - name: List ZIP contents (optional debug)
+        run: unzip -l node-app.zip
 
       - uses: actions/upload-artifact@v4
         with:
