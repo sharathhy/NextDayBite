@@ -32,7 +32,6 @@ jobs:
           xcopy ".next\static" "deploy\.next\static" /E /I /Y
           xcopy "public" "deploy\public" /E /I /Y
           copy package.json deploy\
-          copy web.config deploy\
 
       - name: Zip artifact
         run: Compress-Archive -Path deploy\* -Destination deploy.zip
