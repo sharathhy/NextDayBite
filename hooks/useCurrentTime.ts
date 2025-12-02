@@ -17,5 +17,7 @@ export const useCurrentTime = (updateInterval = 30000) => {
     };
   }, [updateInterval]);
 
+  
   return currentTime;
 };
+
