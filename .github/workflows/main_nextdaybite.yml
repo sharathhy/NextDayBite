@@ -8,27 +8,59 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Upload everything to artifact
-        uses: actions/upload-artifact@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          name: app
-          path: .
-          
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Next.js
+        run: npm run build
+
+
+
+      - name: Create deploy folder
+        run: |
+          mkdir deploy
+          cp -r .next deploy/.next
+          cp -r public deploy/public
+          cp server.js deploy/
+          cp web.config deploy/
+          cp package.json deploy/
+          cp package-lock.json deploy/
+          cp -r node_modules deploy/node_modules
+
+      - name: Zip deploy
+        run: |
+          cd deploy
+          zip -r ../node-app.zip .
+
+      - name: List ZIP contents
+        run: unzip -l node-app.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: node-app
+          path: node-app.zip
+
   deploy:
     runs-on: ubuntu-latest
     needs: build
+
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: app
+          name: node-app
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2703031C28F44AD5B4C49BEA32097485 }}
           app-name: "NextDayBite"
-          package: .
-          scm-do-build-during-deployment: true  
+          package: node-app.zip
