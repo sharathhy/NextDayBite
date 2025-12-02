@@ -22,7 +22,7 @@ jobs:
       - name: Build Next.js
         run: npm run build
 
-      - name: Create deploy folder (no node_modules to avoid 500 & space errors)
+      - name: Create deploy folder (do NOT include node_modules)
         run: |
           mkdir deploy
           cp -r .next deploy/.next
@@ -32,10 +32,10 @@ jobs:
           cp server.js deploy/
           cp web.config deploy/
 
-      - name: Zip deploy
+      - name: Zip deploy (contents must be at ZIP ROOT)
         run: |
           cd deploy
-          zip -r ../node-app.zip . -x "*.next/cache/*"
+          zip -r ../node-app.zip * .[^.]*
 
       - uses: actions/upload-artifact@v4
         with:
