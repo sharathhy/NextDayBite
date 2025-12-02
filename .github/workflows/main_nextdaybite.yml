@@ -18,33 +18,35 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm ci --include=optional
+        run: npm ci
 
       - name: Build Next.js (Standalone)
         run: npm run build
 
-      - name: Create deploy folder (Azure-ready)
+      - name: Create deploy folder
         run: |
           mkdir deploy
           cp -r .next/standalone/* deploy/
-          mkdir -p deploy/.next/static
           cp -r .next/static deploy/.next/static
-          cp public deploy/public || true
+          cp -r public deploy/public
           cp server.js deploy/
           cp web.config deploy/
           cp package.json deploy/
           cp package-lock.json deploy/
 
-      - name: Production prune
-        run: npm prune --production
-
-      - name: Copy pruned node_modules to deploy
-        run: cp -r node_modules deploy/node_modules
+      - name: Install production deps only
+        run: |
+          npm ci --only=production
+          npm prune --production
+          cp -r node_modules deploy/node_modules
 
       - name: Zip deploy
         run: |
           cd deploy
           zip -r ../node-app.zip .
+
+      - name: List ZIP contents
+        run: unzip -l node-app.zip
 
       - uses: actions/upload-artifact@v4
         with:
