@@ -40,7 +40,7 @@ jobs:
       - name: Zip deploy
         run: |
           cd deploy
-          zip -r ../node-app.zip .
+          zip -r ../node-app.zip ./*
 
       - name: List ZIP contents
         run: unzip -l node-app.zip
