@@ -6,73 +6,16 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-      # 1. Checkout repository
-      - uses: actions/checkout@v4
-
-      # 2. Set up Node.js
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-
-      # 3. Install dependencies
-      - name: Install dependencies
-        run: npm ci
-
-      # 4. Generate Prisma client (if Prisma is used)
-      - name: Prisma generate
-        run: npx prisma generate
-        continue-on-error: true
-
-      # 5. Build Next.js
-      - name: Build Next.js
-        run: npm run build
-
-      # 6. Prepare deploy package (only necessary files)
-      - name: Create deployment artifact
-        run: |
-          mkdir deploy
-          cp -r .next deploy/.next
-          cp -r public deploy/public
-          cp -r prisma deploy/prisma || true
-          cp -r .prisma deploy/.prisma || true
-          cp package.json deploy/
-          cp package-lock.json deploy/
-          cp next.config.js deploy/ || true
-          cp server.js deploy/
-          cp web.config deploy/ || true
-
-      # 7. Zip deploy folder
-      - name: Zip deploy
-        run: |
-          cd deploy
-          zip -r ../app.zip .
-
-      # 8. Upload artifact
-      - uses: actions/upload-artifact@v4
-        with:
-          name: app
-          path: app.zip
-
-
   deploy:
     runs-on: ubuntu-latest
-    needs: build
 
     steps:
-      # 1. Download artifact
-      - uses: actions/download-artifact@v4
-        with:
-          name: app
+      - uses: actions/checkout@v4
 
-      # 2. Deploy to Azure Web App
-      - name: Deploy to Azure Web App
+      - name: Upload to Azure Web App using source build
         uses: azure/webapps-deploy@v3
         with:
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2703031C28F44AD5B4C49BEA32097485 }}
           app-name: "NextDayBite"
-          package: app.zip
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2703031C28F44AD5B4C49BEA32097485 }}
+          package: .
+
