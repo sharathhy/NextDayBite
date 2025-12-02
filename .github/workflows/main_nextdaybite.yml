@@ -1,18 +1,17 @@
-name: Deploy Next.js to Azure Web App
+name: Deploy Next.js to Azure Web App - NextDayBite
 
 on:
   push:
-    branches: [ "main" ]
-  workflow_dispatch:
+    branches: [main]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  build-and-deploy:
+    runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Use Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: "20"
@@ -20,19 +19,27 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Generate Prisma client
+      - name: Prisma generate
         run: npx prisma generate
 
       - name: Build Next.js
         run: npm run build
 
-      - name: Zip build output
-        run: zip -r build.zip . -x "*.git*"
+      - name: Prepare deployment artifact
+        run: |
+          mkdir deploy
+          xcopy ".next\standalone" "deploy" /E /I /Y
+          xcopy ".next\static" "deploy\.next\static" /E /I /Y
+          xcopy "public" "deploy\public" /E /I /Y
+          copy package.json deploy\
+          copy web.config deploy\
 
-      - name: Deploy to Azure
+      - name: Zip artifact
+        run: Compress-Archive -Path deploy\* -Destination deploy.zip
+
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: "NextDayBite"
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2703031C28F44AD5B4C49BEA32097485 }}
-          package: build.zip
-          
+          app-name: NextDayBite
+          package: deploy.zip
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISH_PROFILE }}

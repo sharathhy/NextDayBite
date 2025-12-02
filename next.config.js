@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // output: 'standalone', // Optimizes the build for deployment (like Azure App Service)
+  output: 'standalone', // Optimizes the build for deployment (like Azure App Service)
   typescript: {
     // !! WARN !!
     // Dangerously allow production builds to successfully complete even if
