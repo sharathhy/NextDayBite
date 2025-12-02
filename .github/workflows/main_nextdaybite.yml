@@ -26,8 +26,18 @@ jobs:
       - name: Create deploy folder
         run: |
           mkdir deploy
+          # copy standalone app (contains node_modules)
           cp -r .next/standalone/* deploy/
-          cp -r .next/static deploy/.next/static
+          
+          # ensure .next folder exists inside deploy before placing static
+          mkdir -p deploy/.next/static
+          
+          # copy static files if present
+          if [ -d ".next/static" ]; then
+            cp -r .next/static/* deploy/.next/static/
+          fi
+          
+          # additional files
           cp -r public deploy/public
           cp package.json deploy/
           cp server.js deploy/
