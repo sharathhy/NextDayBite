@@ -37,7 +37,7 @@ jobs:
           cp package-lock.json deploy/
           cp web.config deploy/
           cp server.js deploy/
-
+          cp -r node_modules deploy/node_modules
       # 6. Zip deploy folder
       - name: Zip deploy
         run: |
