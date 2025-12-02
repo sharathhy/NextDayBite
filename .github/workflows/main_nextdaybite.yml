@@ -35,7 +35,7 @@ jobs:
           cp web.config deploy/
           cp package.json deploy/
           cp package-lock.json deploy/
-          cp -r node_modules deploy/
+          cp -r node_modules deploy/node_modules
 
       - name: Zip deploy
         run: zip -r node-app.zip deploy/*
