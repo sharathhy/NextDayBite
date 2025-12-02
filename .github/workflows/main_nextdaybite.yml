@@ -35,3 +35,4 @@ jobs:
           app-name: "NextDayBite"
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2703031C28F44AD5B4C49BEA32097485 }}
           package: build.zip
+          
