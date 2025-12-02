@@ -17,7 +17,7 @@ jobs:
           node-version: "20"
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install --legacy-peer-deps
 
       - name: Prisma generate
         run: npx prisma generate
@@ -30,6 +30,7 @@ jobs:
           mkdir deploy
           xcopy ".next" "deploy\.next" /E /I /Y
           xcopy "public" "deploy\public" /E /I /Y
+          xcopy "node_modules" "deploy\node_modules" /E /I /Y
           copy package.json deploy\
           copy server.js deploy\
           copy web.config deploy\
@@ -43,4 +44,3 @@ jobs:
           app-name: NextDayBite
           package: deploy.zip
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2703031C28F44AD5B4C49BEA32097485 }}
-
