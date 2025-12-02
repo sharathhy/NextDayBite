@@ -30,14 +30,18 @@ jobs:
         run: npm ci --only=production
 
       - name: Create deployment package
-        run: |
-          zip -r node-app.zip . \
-            -x "*.github*" \
-            -x "prisma/*" \
-            -x "metadata.json" \
-            -x "instructions.txt" \
-            -x "tests/*" \
-            -x "*.md"
+  run: |
+    mkdir output
+    cp -r .next output/
+    cp -r public output/
+    cp server.js output/
+    cp web.config output/
+    cp package.json output/
+    cp package-lock.json output/
+    cp -r node_modules output/
+    cd output
+    zip -r ../node-app.zip .
+    cd ..
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
