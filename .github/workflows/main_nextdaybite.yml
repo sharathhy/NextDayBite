@@ -2,7 +2,7 @@ name: Deploy Next.js to Azure Web App - NextDayBite
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -12,36 +12,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       - name: Build Next.js
         run: npm run build
 
-      - name: Install production dependencies
-        run: npm ci --only=production
-
-      - name: Create deploy folder
+      - name: Create deploy folder (no node_modules to avoid 500 & space errors)
         run: |
           mkdir deploy
           cp -r .next deploy/.next
           cp -r public deploy/public
-          cp server.js deploy/
-          cp web.config deploy/
           cp package.json deploy/
           cp package-lock.json deploy/
-          cp -r node_modules deploy/node_modules
+          cp server.js deploy/
+          cp web.config deploy/
 
       - name: Zip deploy
-        run: zip -r node-app.zip deploy/*
-
-      - name: List ZIP contents
-        run: unzip -l node-app.zip
+        run: |
+          cd deploy
+          zip -r ../node-app.zip . -x "*.next/cache/*"
 
       - uses: actions/upload-artifact@v4
         with:
