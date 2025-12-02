@@ -23,8 +23,7 @@ jobs:
       - name: Build Next.js
         run: npm run build
 
-      - name: Install production dependencies
-        run: npm ci --only=production
+
 
       - name: Create deploy folder
         run: |
@@ -35,12 +34,11 @@ jobs:
           cp web.config deploy/
           cp package.json deploy/
           cp package-lock.json deploy/
-          cp -r node_modules deploy/node_modules
 
       - name: Zip deploy
         run: |
           cd deploy
-          zip -r ../node-app.zip ./*
+          zip -r ../node-app.zip .
 
       - name: List ZIP contents
         run: unzip -l node-app.zip
