@@ -23,11 +23,7 @@ jobs:
       - name: Build Next.js
         run: npm run build
 
-      # install only production deps and remove dev deps
-      - name: Optimize node_modules size
-        run: |
-          npm ci --only=production
-          npm prune --production
+
 
       - name: Create deploy folder
         run: |
