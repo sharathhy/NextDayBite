@@ -30,11 +30,18 @@ jobs:
           mkdir deploy
           cp -r .next deploy/.next
           cp -r public deploy/public
-          cp server.js deploy/
-          cp web.config deploy/
           cp package.json deploy/
           cp package-lock.json deploy/
+          cp web.config deploy/
+          cp server.js deploy/
+          npm prune --production
           cp -r node_modules deploy/node_modules
+
+      - name: Zip deploy
+        run: |
+          cd deploy
+          zip -r ../app.zip .
+
 
       - name: Zip deploy
         run: |
@@ -63,4 +70,4 @@ jobs:
         with:
           publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_2703031C28F44AD5B4C49BEA32097485 }}
           app-name: "NextDayBite"
-          package: node-app.zip
+          package: app.zip
