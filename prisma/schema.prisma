@@ -4,6 +4,7 @@
 // Specifies the Prisma Client generator.
 generator client {
   provider = "prisma-client-js"
+  engineType = "binary"
 }
 
 // Defines the database connection. 
