@@ -21,6 +21,8 @@ export default async function handler(
 
   if (req.method === 'GET') {
     try {
+      console.log("DATABASE_URL:", process.env.DATABASE_URL);
+
       const entries = await prisma.mealEntry.findMany({
         orderBy: [
           { date: 'asc' },
