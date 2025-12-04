@@ -571,45 +571,49 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ entries, onAddSi
 
     return (
         <div className="space-y-8">
-            <div className="flex flex-wrap justify-center mb-6 gap-2">
-                <div className="inline-flex rounded-md shadow-sm" role="group">
-                    <button
-                        type="button"
-                        onClick={() => setActiveTab('entries')}
-                        className={`px-4 py-2 text-sm font-medium border border-gray-200 rounded-l-lg ${activeTab === 'entries' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-900 hover:bg-gray-100'}`}
-                    >
-                        Manage Entries
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setActiveTab('scanner')}
-                        className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 ${activeTab === 'scanner' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-900 hover:bg-gray-100'}`}
-                    >
-                        Scanner
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setActiveTab('transactions')}
-                        className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 ${activeTab === 'transactions' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-900 hover:bg-gray-100'}`}
-                    >
-                        Transactions
-                    </button>
-                     <button
-                        type="button"
-                        onClick={() => setActiveTab('redemptions')}
-                        className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 ${activeTab === 'redemptions' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-900 hover:bg-gray-100'}`}
-                    >
-                        Redemptions
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setActiveTab('feedback')}
-                        className={`px-4 py-2 text-sm font-medium border border-gray-200 rounded-r-lg ${activeTab === 'feedback' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-900 hover:bg-gray-100'}`}
-                    >
-                        Feedback
-                    </button>
-                </div>
-            </div>
+          <div className="flex flex-wrap justify-center mb-6 gap-2">
+  <div className="flex flex-wrap rounded-md shadow-sm" role="group">
+    <button
+      type="button"
+      onClick={() => setActiveTab('entries')}
+      className={`px-4 py-2 text-sm font-medium border border-gray-200 rounded-l-lg ${activeTab === 'entries' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-900 hover:bg-gray-100'}`}
+    >
+      Manage Entries
+    </button>
+
+    <button
+      type="button"
+      onClick={() => setActiveTab('scanner')}
+      className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 ${activeTab === 'scanner' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-900 hover:bg-gray-100'}`}
+    >
+      Scanner
+    </button>
+
+    <button
+      type="button"
+      onClick={() => setActiveTab('transactions')}
+      className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 ${activeTab === 'transactions' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-900 hover:bg-gray-100'}`}
+    >
+      Transactions
+    </button>
+
+    <button
+      type="button"
+      onClick={() => setActiveTab('redemptions')}
+      className={`px-4 py-2 text-sm font-medium border-t border-b border-r border-gray-200 ${activeTab === 'redemptions' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-900 hover:bg-gray-100'}`}
+    >
+      Redemptions
+    </button>
+
+    <button
+      type="button"
+      onClick={() => setActiveTab('feedback')}
+      className={`px-4 py-2 text-sm font-medium border border-gray-200 rounded-r-lg ${activeTab === 'feedback' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-900 hover:bg-gray-100'}`}
+    >
+      Feedback
+    </button>
+  </div>
+</div>
 
             {activeTab === 'entries' && (
                 <>

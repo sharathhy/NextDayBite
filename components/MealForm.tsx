@@ -508,7 +508,7 @@ const remainingPoints = availablePoints - pointsToRedeem;
       setSuccess(`Meal(s) successfully booked for ${selectedDates.length} day(s)! ${pointsToRedeem > 0 ? `Redeemed ${pointsToRedeem} point(s).` : ''}`);
       setTimeout(() => {
   setSuccess('');
-}, 5000);
+}, 10000);
       setFormData(initialFormState); 
       setSelectedDates([]);
       setUsePoints(false);

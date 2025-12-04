@@ -10,6 +10,7 @@ import { LoginModal } from '../components/LoginModal';
 import { UserCircleIcon, LogoutIcon, FoodDomeIcon } from '../components/icons';
 import bg from '../public/office.jpg'
 
+
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 const Home: React.FC = () => {
@@ -121,7 +122,7 @@ const Home: React.FC = () => {
   if (error) return <div className="text-center text-red-500">Failed to load meal entries. Please try again later.</div>
 
   return (
-    <div className="bg-gray-50 min-h-screen font-sans flex flex-col" style={{
+    <div className="bg-gray-50 min-h-screen font-sans flex flex-col meal-form" style={{
   backgroundImage: "url('/office.jpg')",
   backgroundSize: "cover",
   backgroundPosition: "center",
@@ -136,31 +137,44 @@ const Home: React.FC = () => {
 
       {showLoginModal && <LoginModal onLoginAttempt={handleLoginAttempt} onClose={() => setShowLoginModal(false)} />}
       
-    <header className="bg-white shadow-sm sticky top-0 z-10 border-b-black">
-        <nav className="container px-2 w-full h-full mx-auto">
-          <div className="flex justify-between items-center py-2">
-            <div className="flex items-center gap-2">
-              <img src="/logo.png" alt="MealPlanner Logo" className="h-18 w-32 object-contain" />
-            </div>
-          <div className="flex items-center gap-3">
-  <img
-    src="/nxtdaybite2.png"
-    alt="Next Day Bite Logo"
-    className="h-12 w-10 object-contain"
-  />
+  <header className="bg-white shadow-sm sticky top-0 z-10 border-b-black">
+  <nav className="container px-2 w-full h-full mx-auto">
+    <div className="flex flex-wrap items-center py-2">
 
-  <h1 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-[linear-gradient(to_right,#6939a8_0%,#6939a8_45%,#397bad_50%,#397bad_100%)]">
-    Next Day Bite
-  </h1>
-</div>
+      {/* Left Logo */}
+      <div className="flex flex-1 justify-center md:justify-start items-center">
+        <img
+          src="/logo.png"
+          alt="MealPlanner Logo"
+          className="h-12 sm:h-16 md:h-18 w-24 sm:w-28 md:w-32 object-contain"
+        />
+      </div>
 
+      {/* Middle Logo + Title */}
+      <div className="flex flex-1 flex-col md:flex-row justify-center items-center gap-1 sm:gap-2 text-center">
+        <img
+          src="/nxtdaybite2.png"
+          alt="Next Day Bite Logo"
+          className="h-8 sm:h-10 md:h-12 w-8 sm:w-10 md:w-10 object-contain"
+        />
+        <h1 className="text-xl sm:text-3xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-[linear-gradient(to_right,#6939a8_0%,#6939a8_45%,#397bad_50%,#397bad_100%)]">
+          Next Day Bite
+        </h1>
+      </div>
 
-            <div className="flex items-center gap-2">
-              <img src="/AE_C5i_Logo.png" alt="MealPlanner Logo" className="h-20 w-32 object-contain" />
-            </div>
-          </div>
-        </nav>
-      </header>
+      {/* Right Logo */}
+      <div className="flex flex-1 justify-center md:justify-end items-center">
+        <img
+          src="/AE_C5i_Logo.png"
+          alt="MealPlanner Logo"
+          className="h-12 sm:h-16 md:h-20 w-24 sm:w-28 md:w-32 object-contain"
+        />
+      </div>
+
+    </div>
+  </nav>
+</header>
+
 
       <div className="container mx-auto px-4 pt-4"  >
         <div className="flex justify-end">
