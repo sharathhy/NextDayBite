@@ -1,0 +1,6 @@
+.meal-form input,
+.meal-form select,
+.meal-form textarea,
+.meal-form label {
+  font-size: 16px !important;
+}

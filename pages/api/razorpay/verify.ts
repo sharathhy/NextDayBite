@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import crypto from 'crypto';
 import prisma from '../../../lib/prisma';
 import { MealEntry } from '../../../types';
-
+import { useCurrentTime } from '@/hooks/useCurrentTime';
 // Simple UUID generator
 const generateId = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -10,6 +10,16 @@ const generateId = () => {
     return v.toString(16);
   });
 };
+
+
+// Helper to get current IST timestamp
+const getISTDate = (): Date => {
+  const nowUTC = new Date();
+  const istOffset = 5.5 * 60 * 60 * 1000; // 5 hours 30 minutes
+  return new Date(nowUTC.getTime() + istOffset);
+};
+
+
 
 export default async function handler(
   req: NextApiRequest,
@@ -71,8 +81,9 @@ export default async function handler(
             razorpay_order_id,
             razorpay_payment_id,
             razorpay_signature,
-            amount: amount * 100, // Store in paise
-            currency: 'INR'
+            amount: amount * 100,  // Store in paise
+            currency: 'INR',
+            createdAt: getISTDate(),
           }
         });
 
@@ -97,7 +108,10 @@ export default async function handler(
             ...entry,
             id: generateId(),
             mealType: entry.mealType === 'Veg' ? 'Veg' : 'Non_Veg', 
-            paymentMethod: 'Online' // Mark as paid via Razorpay
+            paymentMethod: 'Online', // Mark as paid via Razorpay
+            createdAt: getISTDate(),
+            updatedAt: getISTDate(),
+            isCancelled: false,
         }));
 
         return await tx.mealEntry.createMany({

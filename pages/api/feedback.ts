@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import prisma from '../../lib/prisma';
-
+import { useCurrentTime } from '@/hooks/useCurrentTime';
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -18,6 +18,7 @@ export default async function handler(
         data: {
           category,
           rating: rating ? parseInt(rating) : null,
+          createdAt: useCurrentTime,
           message,
         },
       });

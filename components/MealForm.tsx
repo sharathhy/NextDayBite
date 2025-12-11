@@ -164,81 +164,7 @@ export const MealForm: React.FC<MealFormProps> = ({ onAddEntries, existingEntryF
     );
   };
 
-//   const handleRazorpayPayment = async (amount: number, entriesToAdd: any[], pointsToRedeem: number) => {
-//       // 1. Create Order
-//       const res = await fetch('/api/razorpay/order', {
-//           method: 'POST',
-//           headers: { 'Content-Type': 'application/json' },
-//           body: JSON.stringify({ amount, currency: 'INR' })
-//       });
-      
-//       if (!res.ok) throw new Error("Failed to initiate payment order");
-//       const order = await res.json();
 
-//       // 2. Open Razorpay
-//       const options = {
-//           key: process.env.RAZORPAY_KEY_ID || 'rzp_test_placeholder', 
-//           amount: order.amount,
-//           currency: order.currency,
-//           name: "Meal Planner AI",
-//           description: "Meal Booking Payment",
-//           order_id: order.id,
-//           handler: async function (response: any) {
-//               setIsSubmitting(true);
-//               // 3. Verify Payment & Add Entries
-//               const verifyRes = await fetch('/api/razorpay/verify', {
-//                   method: 'POST',
-//                   headers: { 'Content-Type': 'application/json' },
-//                   body: JSON.stringify({
-//                       razorpay_order_id: response.razorpay_order_id,
-//                       razorpay_payment_id: response.razorpay_payment_id,
-//                       razorpay_signature: response.razorpay_signature,
-//                       entries: entriesToAdd,
-//                       amount: amount,
-//                       redeemPoints: pointsToRedeem
-//                   })
-//               });
-
-//               const verifyData = await verifyRes.json();
-
-//               if (verifyRes.ok) {
-//                   setSuccess(`Payment Successful! Meals Booked. Payment ID: ${response.razorpay_payment_id}`);
-//                   setFormData(initialFormState); 
-//                   setSelectedDates([]);
-//                   setUsePoints(false);
-//                   setTimeout(() => fetchPoints(formData.employeeId), 500);
-                  
-//                   // Trigger parent refresh if possible via onAddEntries (which triggers mutate in parent)
-//                   // Since onAddEntries is skipped here, we might need to manually trigger a refresh
-//                   // or just allow the SWR re-validation to handle it on focus.
-//                   // Ideally pass a refresh callback, but for now relying on parent re-fetch.
-//                   // Hack: Call onAddEntries with empty to trigger mutate? 
-//                   // Better: window.location.reload() or just update local state if complex.
-//                   // Let's assume onAddEntries prop can be used for "refresh" or modify it later.
-//                   // For now, reload the page to be safe or rely on parent polling.
-//                   window.location.reload(); 
-//               } else {
-//                   setError(verifyData.message || "Payment verification failed.");
-//               }
-//               setIsSubmitting(false);
-//           },
-//           prefill: {
-//               name: formData.employeeName,
-//               email: `${formData.employeeId}@company.com`,
-//               contact: "9999999999"
-//           },
-//           theme: {
-//               color: "#4F46E5"
-//           }
-//       };
-
-//       const rzp1 = new window.Razorpay(options);
-//       rzp1.on('payment.failed', function (response: any){
-//           setError(`Payment Failed: ${response.error.description}`);
-//           setIsSubmitting(false);
-//       });
-//       rzp1.open();
-//   }
 
 
 useEffect(() => {
@@ -256,74 +182,6 @@ useEffect(() => {
 }, []);
 
 
-// useEffect(() => {
-//   if (formData.employeeId) {
-//     fetch(`/api/userPoints?employeeId=${formData.employeeId}`)
-//       .then(res => res.json())
-//       .then(data => setAvailablePoints(data.points));
-//   }
-// }, [formData.employeeId]);
-
-
-
-// const handleRazorpayPayment = async (amount: number, entriesToAdd: any[], pointsToRedeem: number) => {
-//     const res = await fetch('/api/razorpay/order', {
-//         method: 'POST',
-//         headers: { 'Content-Type': 'application/json' },
-//         body: JSON.stringify({ amount, currency: 'INR' })
-//     });
-
-//     if (!res.ok) throw new Error("Failed to initiate payment order");
-//     const order = await res.json();
-
-//     const options = {
-//         key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-//         amount: order.amount,
-//         currency: order.currency,
-//         name: "Meal Planner AI",
-//         description: "Meal Booking Payment",
-//         order_id: order.id,
-//         handler: async function (response: any) {
-//             setIsSubmitting(true);
-            
-//             const verifyRes = await fetch('/api/razorpay/verify', {
-//                 method: 'POST',
-//                 headers: { 'Content-Type': 'application/json' },
-//                 body: JSON.stringify({
-//                     razorpay_order_id: response.razorpay_order_id,
-//                     razorpay_payment_id: response.razorpay_payment_id,
-//                     razorpay_signature: response.razorpay_signature,
-//                     entries: entriesToAdd,
-//                     amount,
-//                     redeemPoints: pointsToRedeem
-//                 })
-//             });
-
-//             const verifyData = await verifyRes.json();
-//             if (verifyRes.ok) {
-//                 setSuccess("Payment Successful! Meals Booked.");
-//                 window.location.reload();
-//             } else {
-//                 setError(verifyData.message || "Payment verification failed.");
-//             }
-//             setIsSubmitting(false);
-//         },
-//         prefill: {
-//             name: formData.employeeName,
-//             email: `${formData.employeeName}@c5i.com`,
-//             contact: "8310083237"
-//         },
-//         theme: { color: "#4F46E5" }
-//     };
-
-//     if (!window.Razorpay) {
-//         alert("Razorpay SDK is not loaded, please try again.");
-//         return;
-//     }
-
-//     const rzp1 = new window.Razorpay(options);
-//     rzp1.open();
-// };
 
 
 const handleRazorpayPayment = async (amount: number, entriesToAdd: any[], pointsToRedeem: number) => {
@@ -451,6 +309,7 @@ const entriesToAdd = selectedDates.map(date => {
     mealType: (formData.mealType === MealType.NON_VEG && isNonVegDay)
       ? MealType.NON_VEG
       : MealType.VEG,
+    isCancelled: false,
   };
 });
 
@@ -549,12 +408,27 @@ const remainingPoints = availablePoints - pointsToRedeem;
       setQrEntryId(id);
   }
   
-  const userEntries = useMemo(() => {
-    if (!formData.employeeId) return [];
-    return entries
-        .filter(e => e.employeeId === formData.employeeId)
-        .sort((a, b) => a.date.localeCompare(b.date));
-  }, [entries, formData.employeeId]);
+//   const userEntries = useMemo(() => {
+//     if (!formData.employeeId) return [];
+//     return entries
+//         .filter(e => e.employeeId === formData.employeeId)
+//         .sort((a, b) => a.date.localeCompare(b.date));
+//   }, [entries, formData.employeeId]);
+
+const userEntries = useMemo(() => {
+  if (!formData.employeeId) return [];
+
+  const today = formatDateToYYYYMMDD(new Date()); // current date in YYYY-MM-DD
+
+  return entries
+    .filter(
+      e =>
+        e.employeeId === formData.employeeId &&
+        e.date >= today // show only current or future dates
+    )
+    .sort((a, b) => a.date.localeCompare(b.date));
+}, [entries, formData.employeeId]);
+
 
   const isSubmissionDisabled = isSubmitting;
 
@@ -722,7 +596,7 @@ const remainingPoints = usePoints ? availablePoints - pendingPointsUsage : avail
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none transition-colors duration-200 text-gray-400 group-focus-within:text-indigo-600">
                                     <LocationMarkerIcon className="h-5 w-5" />
                                 </div>
-                                <input type="text" name="location" id="location" value={formData.location} onChange={handleChange} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm pl-10 py-2.5 transition-colors duration-200" placeholder="e.g., 5th Floor"/>
+                                <input type="text" name="location" id="location" value={formData.location} onChange={handleChange} className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm pl-10 py-2.5 transition-colors duration-200" placeholder="e.g., Bangalore"/>
                             </div>
                         </div>
                         <div>
@@ -864,38 +738,40 @@ const remainingPoints = usePoints ? availablePoints - pendingPointsUsage : avail
                                 <p className="text-gray-500 text-sm italic text-center py-4">No meals found for this Employee ID.</p>
                             ) : (
                                 <ul className="space-y-3">
-                                    {userEntries.map(entry => (
-                                        <li key={entry.id} className={`bg-white border rounded-lg p-3 flex justify-between items-center shadow-sm hover:shadow-md transition-shadow ${entry.isRedeemed ? 'opacity-60 bg-gray-50 border-gray-200' : 'border-gray-200'}`}>
-                                            <div>
-                                                <p className="font-medium text-indigo-700">{formatDateForDisplay(new Date(entry.date))}</p>
-                                                <p className="text-xs text-gray-500">{entry.mealType} • {entry.location}</p>
-                                                {entry.isRedeemed && <span className="text-xs bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded mt-1 inline-block">Redeemed</span>}
-                                                {entry.paymentMethod === 'Online' && <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded mt-1 ml-1 inline-block">Paid Online</span>}
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                                {!entry.isRedeemed && (
-                                                    <button
-                                                        type="button"
-                                                        onClick={(e) => handleViewQR(e, entry.id)}
-                                                        className="text-xs px-3 py-1.5 rounded text-indigo-700 bg-indigo-50 border border-indigo-200 font-medium hover:bg-indigo-100 transition-colors flex items-center gap-1"
-                                                    >
-                                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4h2v-4zM6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                        </svg>
-                                                        QR
-                                                    </button>
-                                                )}
-                                                <button
-                                                    type="button"
-                                                    onClick={(e) => handleCancelClick(e, entry.id,entry)}
-                                                    disabled={cancellingId === entry.id || entry.isRedeemed}
-                                                    className={`text-xs px-3 py-1.5 rounded text-white font-medium transition-colors ${cancellingId === entry.id || entry.isRedeemed ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-500 hover:bg-red-600'}`}
-                                                >
-                                                    {cancellingId === entry.id ? '...' : 'Cancel'}
-                                                </button>
-                                            </div>
-                                        </li>
-                                    ))}
+                                   {userEntries
+  .filter(entry => !entry.isCancelled)   // ⬅️ removes cancelled entries
+  .map(entry => (
+    <li key={entry.id} className={`bg-white border rounded-lg p-3 flex justify-between items-center shadow-sm hover:shadow-md transition-shadow ${entry.isRedeemed ? 'opacity-60 bg-gray-50 border-gray-200' : 'border-gray-200'}`}>
+      <div>
+        <p className="font-medium text-indigo-700">{formatDateForDisplay(new Date(entry.date))}</p>
+        <p className="text-xs text-gray-500">{entry.mealType} • {entry.location}</p>
+        {entry.isRedeemed && <span className="text-xs bg-gray-200 text-gray-600 px-1.5 py-0.5 rounded mt-1 inline-block">Redeemed</span>}
+        {entry.paymentMethod === 'Online' && <span className="text-xs bg-green-100 text-green-700 px-1.5 py-0.5 rounded mt-1 ml-1 inline-block">Paid Online</span>}
+      </div>
+
+      <div className="flex items-center gap-2">
+        {!entry.isRedeemed && (
+          <button
+            type="button"
+            onClick={(e) => handleViewQR(e, entry.id)}
+            className="text-xs px-3 py-1.5 rounded text-indigo-700 bg-indigo-50 border border-indigo-200 font-medium hover:bg-indigo-100 transition-colors flex items-center gap-1"
+          >
+            QR
+          </button>
+        )}
+
+        <button
+          type="button"
+          onClick={(e) => handleCancelClick(e, entry.id, entry)}
+          disabled={cancellingId === entry.id || entry.isRedeemed}
+          className={`text-xs px-3 py-1.5 rounded text-white font-medium transition-colors ${cancellingId === entry.id || entry.isRedeemed ? 'bg-gray-400 cursor-not-allowed' : 'bg-red-500 hover:bg-red-600'}`}
+        >
+          {cancellingId === entry.id ? '...' : 'Cancel'}
+        </button>
+      </div>
+    </li>
+))}
+
                                 </ul>
                             )}
                         </div>

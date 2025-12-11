@@ -30,10 +30,11 @@ model MealEntry {
   redeemedAt       DateTime?                     // Timestamp of redemption
   createdAt        DateTime @default(now()) // Timestamp for when the record was created
   updatedAt        DateTime @updatedAt      // Timestamp for when the record was last updated
-
+  isCancelled     Boolean  @default(false)      // Tracks if the meal entry was cancelled
   // Defines a unique constraint. 
   // An employee can only have one meal entry per day.
-  @@unique([date, employeeId], name: "date_employeeId_unique")
+ @@unique([date, employeeId, isCancelled], name: "date_employeeId_cancel_unique")
+
 }
 
 model UserPoint {

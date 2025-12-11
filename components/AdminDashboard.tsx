@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { MealEntry, MealType, Payment, Feedback } from '../types';
 import { DownloadIcon } from './icons';
 import { DataTable } from './DataTable';
+import ExcelJS from "exceljs";
 
 // Declare the XLSX global variable provided by the script tag
 declare const XLSX: any;
@@ -437,6 +438,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ entries, onAddSi
     const [activeTab, setActiveTab] = useState<'entries' | 'scanner' | 'transactions' | 'redemptions' | 'feedback'>('entries');
     const [transactions, setTransactions] = useState<Payment[]>([]);
     const [feedbacks, setFeedbacks] = useState<Feedback[]>([]);
+const [employeeFilter, setEmployeeFilter] = useState("");
+const [dateFilter, setDateFilter] = useState("");
+let filteredTransactions: any[] = [];
+const [redeemEmployeeFilter, setRedeemEmployeeFilter] = useState("");
+const [redeemDateFilter, setRedeemDateFilter] = useState("");
+let filteredRedemptions: any[] = [];
 
     useEffect(() => {
         if (activeTab === 'transactions') {
@@ -546,6 +553,139 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ entries, onAddSi
         XLSX.writeFile(workbook, "meal_entries_by_date.xlsx");
     };
 
+const downloadEntriesByDate = async (date: string, activeTabForTable: string) => {
+  // filter entries exactly like before
+  const entriesForDate = entries.filter(e => e.date === date);
+  const filtered = activeTabForTable === "active"
+    ? entriesForDate.filter(e => !e.isCancelled)
+    : entriesForDate.filter(e => e.isCancelled);
+
+  if (filtered.length === 0) {
+    alert("No entries to download for this date.");
+    return;
+  }
+
+  // summary
+  const vegCount = filtered.filter(e => e.mealType === MealType.VEG).length;
+  const nonVegCount = filtered.filter(e => e.mealType === MealType.NON_VEG).length;
+  const totalCount = filtered.length;
+
+  // header and rows
+  const header = [
+    "Scanner ID", "Employee Name", "Employee ID", "Vertical",
+    "Manager", "Location", "Meal Type", "Payment Method", "Redeem Status"
+  ];
+
+  const dataRows = filtered.map(e => [
+    e.id,
+    e.employeeName,
+    e.employeeId,
+    e.vertical,
+    e.reportingManager,
+    e.location,
+    e.mealType,
+    e.paymentMethod,
+    e.isRedeemed ? "Completed" : "Pending"
+  ]);
+
+  const summaryRows = [
+    [], // blank row
+    ['', '', '', '', '', '', '', 'Total Veg:', vegCount],
+    ['', '', '', '', '', '', '', 'Total Non-Veg:', nonVegCount],
+    ['', '', '', '', '', '', '', 'Total Meals:', totalCount]
+  ];
+
+  // create workbook & sheet
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet(`MealEntries_${date}`, { views: [{ state: 'frozen', ySplit: 1 }] }); // freeze header
+
+  // add header row
+  const headerRow = ws.addRow(header);
+
+  // header styling
+  headerRow.eachCell(cell => {
+    cell.font = { bold: true };
+    cell.alignment = { horizontal: 'center', vertical: 'middle' };
+    cell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFDCE6F1' } // light blue similar to your previous value
+    };
+    cell.border = {
+      top: { style: 'thin' },
+      left: { style: 'thin' },
+      bottom: { style: 'thin' },
+      right: { style: 'thin' }
+    };
+  });
+
+  // add data rows
+  dataRows.forEach(r => ws.addRow(r));
+
+  // add a blank row before summary if needed
+  ws.addRow([]);
+
+  // add summary rows (they already include blanks to place totals near the right columns)
+  summaryRows.slice(1).forEach(r => {
+    const row = ws.addRow(r);
+    // style the label column (8th column) and value (9th column)
+    const labelCell = row.getCell(8);
+    const valueCell = row.getCell(9);
+    labelCell.font = { bold: true };
+    valueCell.font = { bold: true };
+    // optionally right-align the label and value
+    labelCell.alignment = { horizontal: 'right' };
+    valueCell.alignment = { horizontal: 'left' };
+  });
+
+  // Auto column width (approximate by characters)
+  // find max length per column from header + data + summary
+  const allRows = [header, ...dataRows, ...summaryRows];
+  const colCount = header.length;
+  for (let col = 1; col <= colCount; col++) {
+    let maxLength = 10; // minimum
+    for (let r = 0; r < allRows.length; r++) {
+      const v = allRows[r][col - 1];
+      if (v !== undefined && v !== null) {
+        const len = v.toString().length;
+        if (len > maxLength) maxLength = len;
+      }
+    }
+    // ExcelJS width is roughly characters; add padding
+    ws.getColumn(col).width = Math.min(Math.max(maxLength + 4, 10), 60); // clamp between 10 and 60
+  }
+
+  // Optional: add border for all data cells
+  ws.eachRow((row, rowNumber) => {
+    row.eachCell((cell) => {
+      cell.border = cell.border || {
+        top: { style: 'thin' },
+        left: { style: 'thin' },
+        bottom: { style: 'thin' },
+        right: { style: 'thin' }
+      };
+    });
+  });
+
+  // prepare file for download in browser
+  const buf = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buf], { type: "application/octet-stream" });
+  const filename = activeTabForTable === "active" ? `Active_${date}.xlsx` : `Cancelled_${date}.xlsx`;
+
+  // download (no external dependency)
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(link.href);
+};
+
+
+
+    
+
     const handleDownloadSingleDate = (dateToDownload: string) => {
         if (typeof XLSX === 'undefined') return;
         const dailyEntries = entries.filter(e => e.date === dateToDownload);
@@ -617,19 +757,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ entries, onAddSi
 
             {activeTab === 'entries' && (
                 <>
-                <div className="flex justify-center">
+                {/* <div className="flex justify-center">
                     <button onClick={downloadAllXLSX} className="inline-flex items-center gap-2 bg-green-600 text-white font-semibold py-2 px-6 rounded-lg shadow-md hover:bg-green-700 transition-colors duration-200" disabled={entries.length === 0}>
                         <DownloadIcon />
                         Download All Entries
                     </button>
-                </div>
+                </div> */}
                 <AdminAddForm onAddSingleEntry={onAddSingleEntry} existingEntryForDate={existingEntryForDate} />
                 <DataTable 
                 entries={entries} 
                 onCancelEntry={onCancelEntry} 
                 currentTime={currentTime} 
                 isAdmin={true}
-                onDownloadDate={handleDownloadSingleDate}
+                onDownloadDate={downloadEntriesByDate}
+
                 />
                 </>
             )}
@@ -638,81 +779,183 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({ entries, onAddSi
                 <ScannerInterface onRefresh={onRefresh} onRedeemEntry={onRedeemEntry} />
             )}
 
-            {activeTab === 'transactions' && (
-                <div className="bg-white p-6 rounded-2xl shadow-lg">
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-xl font-bold text-gray-800">Payment Transactions</h3>
-                         <button onClick={downloadTransactionsXLSX} className="inline-flex items-center gap-1.5 bg-gray-100 text-gray-700 font-semibold py-1.5 px-3 rounded-md hover:bg-gray-200 text-sm">
-                            <DownloadIcon className="h-4 w-4"/> Download
-                        </button>
-                    </div>
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment ID</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {transactions.length === 0 ? (
-                                    <tr><td colSpan={5} className="px-6 py-4 text-center text-gray-500">No transactions found.</td></tr>
-                                ) : (
-                                    transactions.map(t => (
-                                        <tr key={t.id}>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{t.date}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-600">{t.razorpay_payment_id}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{t.employeeId}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">₹{(t.amount / 100).toFixed(2)}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(t.createdAt).toLocaleString()}</td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
+           {activeTab === 'transactions' && (
+  <div className="bg-white p-6 rounded-2xl shadow-lg">
+    <div className="flex justify-between items-center mb-4">
+      <h3 className="text-xl font-bold text-gray-800">Payment Transactions</h3>
+      <button
+        onClick={downloadTransactionsXLSX}
+        className="inline-flex items-center gap-1.5 bg-gray-100 text-gray-700 font-semibold py-1.5 px-3 rounded-md hover:bg-gray-200 text-sm"
+      >
+        <DownloadIcon className="h-4 w-4" /> Download
+      </button>
+    </div>
 
-            {activeTab === 'redemptions' && (
-                <div className="bg-white p-6 rounded-2xl shadow-lg">
-                    <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-xl font-bold text-gray-800">Redemption Log</h3>
-                        <button onClick={downloadRedemptionsXLSX} className="inline-flex items-center gap-1.5 bg-gray-100 text-gray-700 font-semibold py-1.5 px-3 rounded-md hover:bg-gray-200 text-sm">
-                            <DownloadIcon className="h-4 w-4"/> Download
-                        </button>
-                    </div>
-                     <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Meal Type</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Redeemed At</th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {redeemedEntries.length === 0 ? (
-                                    <tr><td colSpan={4} className="px-6 py-4 text-center text-gray-500">No redemptions found.</td></tr>
-                                ) : (
-                                    redeemedEntries.map(e => (
-                                        <tr key={e.id}>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{e.date}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{e.employeeName} ({e.employeeId})</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{e.mealType}</td>
-                                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{e.redeemedAt ? new Date(e.redeemedAt).toLocaleString() : '-'}</td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            )}
+    {/* 🔍 Filters */}
+    <div className="flex flex-wrap gap-4 mb-4">
+      <input
+        type="text"
+        placeholder="Search Employee ID"
+        value={employeeFilter}
+        onChange={(e) => setEmployeeFilter(e.target.value)}
+        className="border p-2 rounded-md text-sm"
+      />
+
+      <input
+        type="date"
+        value={dateFilter}
+        onChange={(e) => setDateFilter(e.target.value)}
+        className="border p-2 rounded-md text-sm"
+      />
+    </div>
+
+    {/* Filter Logic */}
+    {(() => {
+      filteredTransactions = transactions.filter((t) => {
+        const matchesEmployee =
+          employeeFilter === "" || t.employeeId.toLowerCase().includes(employeeFilter.toLowerCase());
+        const matchesDate = dateFilter === "" || t.date.startsWith(dateFilter);
+        return matchesEmployee && matchesDate;
+      });
+    })()}
+
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Payment ID</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Time</th>
+          </tr>
+        </thead>
+
+        <tbody className="bg-white divide-y divide-gray-200">
+          {filteredTransactions.length === 0 ? (
+            <tr>
+              <td colSpan={5} className="px-6 py-4 text-center text-gray-500">
+                No transactions found.
+              </td>
+            </tr>
+          ) : (
+            filteredTransactions.map((t) => (
+              <tr key={t.id}>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {t.date}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-600">
+                  {t.razorpay_payment_id}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {t.employeeId}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-green-600">
+                  ₹{(t.amount / 100).toFixed(2)}
+                </td>
+
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {(() => {
+                    const str = t.createdAt; // "2025-12-09T19:11:00.110Z"
+                    const [date, time] = str.split("T");
+                    const [year, month, day] = date.split("-");
+                    const [hour, minute] = time.split(":");
+                    return `${day}-${month}-${year} ${hour}:${minute}`;
+                  })()}
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)}
+
+
+         {activeTab === 'redemptions' && (
+  <div className="bg-white p-6 rounded-2xl shadow-lg">
+    <div className="flex justify-between items-center mb-4">
+      <h3 className="text-xl font-bold text-gray-800">Redemption Log</h3>
+      <button
+        onClick={downloadRedemptionsXLSX}
+        className="inline-flex items-center gap-1.5 bg-gray-100 text-gray-700 font-semibold py-1.5 px-3 rounded-md hover:bg-gray-200 text-sm"
+      >
+        <DownloadIcon className="h-4 w-4" /> Download
+      </button>
+    </div>
+
+    {/* 🔍 Filters */}
+    <div className="flex flex-wrap gap-4 mb-4">
+      <input
+        type="text"
+        placeholder="Search Employee ID / Name"
+        value={redeemEmployeeFilter}
+        onChange={(e) => setRedeemEmployeeFilter(e.target.value)}
+        className="border p-2 rounded-md text-sm"
+      />
+
+      <input
+        type="date"
+        value={redeemDateFilter}
+        onChange={(e) => setRedeemDateFilter(e.target.value)}
+        className="border p-2 rounded-md text-sm"
+      />
+    </div>
+
+    {/* Filter Logic */}
+    {(() => {
+      filteredRedemptions = redeemedEntries.filter((e) => {
+        const matchesEmployee =
+          redeemEmployeeFilter === "" ||
+          e.employeeId.toLowerCase().includes(redeemEmployeeFilter.toLowerCase()) ||
+          e.employeeName.toLowerCase().includes(redeemEmployeeFilter.toLowerCase());
+
+        const matchesDate =
+          redeemDateFilter === "" || e.date.startsWith(redeemDateFilter);
+
+        return matchesEmployee && matchesDate;
+      });
+    })()}
+
+    <div className="overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Employee</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Meal Type</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Redeemed At</th>
+          </tr>
+        </thead>
+
+        <tbody className="bg-white divide-y divide-gray-200">
+          {filteredRedemptions.length === 0 ? (
+            <tr>
+              <td colSpan={4} className="px-6 py-4 text-center text-gray-500">
+                No redemptions found.
+              </td>
+            </tr>
+          ) : (
+            filteredRedemptions.map((e) => (
+              <tr key={e.id}>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{e.date}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {e.employeeName} ({e.employeeId})
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{e.mealType}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {e.redeemedAt ? new Date(e.redeemedAt).toLocaleString() : '-'}
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
+  </div>
+)}
+
 
             {activeTab === 'feedback' && (
                 <div className="bg-white p-6 rounded-2xl shadow-lg">

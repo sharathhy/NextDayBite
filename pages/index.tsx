@@ -41,11 +41,24 @@ const Home: React.FC = () => {
 
   const handleAddEntries = useCallback(async (newEntriesData: Omit<MealEntry, 'id'>[], redeemPoints: number = 0): Promise<{ success: boolean, message?: string }> => {
     try {
+
+      const currentIST = new Date(
+  new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+);
+
+console.log('Current IST Time:', currentIST.toString());
+
+const entriesWithTime = newEntriesData.map(e => ({
+  ...e,
+  createdAt: currentIST ,  // 👈 send real local timestamp
+  isCancelled: false,  // 👈 ensure isCancelled is set to false
+}));
+
       const response = await fetch('/api/meals', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-            entries: newEntriesData,
+            entries: entriesWithTime,
             redeemPoints: redeemPoints
         }),
       });
@@ -62,14 +75,29 @@ const Home: React.FC = () => {
     }
   }, [mutate]);
 
-  const handleAddSingleEntry = useCallback(async (entryData: Omit<MealEntry, 'id'>): Promise<{ success: boolean, message?: string }> => {
-    return handleAddEntries([entryData]);
-  }, [handleAddEntries]);
+const handleAddSingleEntry = useCallback(async (
+  entryData: Omit<MealEntry, 'id'>
+): Promise<{ success: boolean, message?: string }> => {
+
+  // Generate IST timestamp
+  const createdAtIST = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+  );
+
+  // Append createdAt to the entry
+  const updatedEntry = {
+    ...entryData,
+    createdAt: createdAtIST,
+  };
+
+  return handleAddEntries([updatedEntry]);
+}, [handleAddEntries]);
+
 
   const handleCancelEntry = useCallback(async (id: string): Promise<boolean> => {
       try {
         const response = await fetch(`/api/meals/${encodeURIComponent(id)}`, {
-          method: 'DELETE',
+          method: 'PUT',
         });
 
         if (!response.ok) {
@@ -103,7 +131,7 @@ const Home: React.FC = () => {
 
   const existingEntryForDate = useCallback((date: string, employeeId: string): boolean => {
     if (!mealEntries) return false;
-    return mealEntries.some(entry => entry.date === date && entry.employeeId === employeeId);
+    return mealEntries.some(entry => entry.date === date && entry.employeeId === employeeId && !entry.isCancelled);
   }, [mealEntries]);
 
   const handleLoginAttempt = (user: string, pass: string): boolean => {

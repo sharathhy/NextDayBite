@@ -23,6 +23,7 @@ export default async function handler(
         amount: amount * 100, // Amount in paise
         currency: currency || "INR",
         receipt: `receipt_order_${Date.now()}`,
+      
       };
 
       const order = await instance.orders.create(options);

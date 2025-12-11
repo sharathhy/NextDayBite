@@ -16,7 +16,8 @@ export interface MealEntry {
   mealType: MealType;
   paymentMethod?: string; // "Standard" or "Points"
   isRedeemed?: boolean;
-    redeemedAt?: string; // ISO Date string
+  redeemedAt?: string; // ISO Date string
+  isCancelled?: boolean;
 }
 
 
